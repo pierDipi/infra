@@ -27,13 +27,13 @@ periodics:
       - --publish
       - --tag-release
       env:
+      - name: DOCKER_IN_DOCKER_ENABLED
+        value: "true"
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/nightly-account/service-account.json
       - name: SIGN_IMAGES
         value: "true"
       - name: ATTEST_IMAGES
-        value: "true"
-      - name: DOCKER_IN_DOCKER_ENABLED
         value: "true"
       image: us-docker.pkg.dev/knative-tests/images/prow-tests:v20250121-eeaf1252f
       name: ""
@@ -41,25 +41,19 @@ periodics:
       securityContext:
         privileged: true
       volumeMounts:
-      - mountPath: /etc/nightly-account
-        name: nightly-account
-        readOnly: true
       - mountPath: /docker-graph
         name: docker-graph
       - mountPath: /lib/modules
         name: modules
       - mountPath: /sys/fs/cgroup
         name: cgroup
+      - mountPath: /etc/nightly-account
+        name: nightly-account
+        readOnly: true
     nodeSelector:
       kubernetes.io/arch: amd64
       type: testing
     volumes:
-    - name: nightly-account
-      secret:
-        items:
-        - key: nightly.json
-          path: service-account.json
-        secretName: prow-google-credentials
     - emptyDir: {}
       name: docker-graph
     - hostPath:
@@ -70,3 +64,9 @@ periodics:
         path: /sys/fs/cgroup
         type: Directory
       name: cgroup
+    - name: nightly-account
+      secret:
+        items:
+        - key: nightly.json
+          path: service-account.json
+        secretName: prow-google-credentials
